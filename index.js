@@ -92,6 +92,8 @@ app.post("/signin", async (req, res) => {
       req.session.email = email;
       req.session.user = { id: user.id };
 
+      console.log(req.session);
+
       const role = user.role;
 
       let rolePage, rolePageConfig;
