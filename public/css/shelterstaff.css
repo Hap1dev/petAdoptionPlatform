@@ -1,57 +1,79 @@
-    body {
-      background-color: #f8f9fa;
-    }
+/* Pet Adoption Platform Theme - SHELTER STAFF PAGE */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Nunito:wght@400;700&display=swap');
 
-    .form-container {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      margin-top: 2rem;
-    }
+body {
+  background: linear-gradient(120deg, #f9f9f9 0%, #ffe5d9 100%);
+  font-family: 'Quicksand', 'Nunito', Arial, sans-serif;
+  color: #333;
+  min-height: 100vh;
+}
 
-    .card {
-      border: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      overflow: hidden; /* Ensures no overflow outside card */
-    }
+.form-container {
+  background: rgba(255,255,255,0.95);
+  padding: 2.5rem;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(255,151,112,0.15);
+  margin-top: 2rem;
+  border: 2px solid #ffd6a5;
+}
 
-    .card-body {
-      padding: 1.5rem;
-    }
+.card {
+  border: none;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(255,151,112,0.08);
+  overflow: hidden;
+  border: 2px solid #c7f9cc;
+  position: relative;
+  margin-bottom: 2rem;
+}
 
-    .card-img {
-      max-width: 100%; /* Ensures image fits within card width */
-      height: auto; /* Maintains aspect ratio */
-      object-fit: cover; /* Ensures image covers the area */
-    }
+.card-body {
+  padding: 1.8rem;
+}
 
-    h1, h2 {
-      color: #343a40;
-      font-weight: bold;
-    }
+.card-img {
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+}
 
-    h3 {
-      font-size: 1.5rem;
-      color: #495057;
-    }
+h1, h2 {
+  color: #ff9770;
+  font-weight: bold;
+  font-family: 'Quicksand', Arial, sans-serif;
+}
 
-    .btn-primary {
-      background-color: #007bff;
-      border: none;
-      transition: background-color 0.3s ease;
-    }
+h3 {
+  font-size: 1.5rem;
+  color: #495057;
+  font-family: 'Quicksand', Arial, sans-serif;
+}
 
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
+.btn-primary {
+  background-color: #00bbf9;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Quicksand', Arial, sans-serif;
+  font-weight: 700;
+  padding: 0.7rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,187,249,0.07);
+  transition: background 0.3s;
+  color: #fff;
+}
 
-    a {
-      color: #007bff;
-      text-decoration: none;
-    }
+.btn-primary:hover {
+  background-color: #00a1d6;
+}
 
-    a:hover {
-      text-decoration: underline;
-    }
+a {
+  color: #ff9770;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #ffd6a5;
+  text-decoration: underline;
+}

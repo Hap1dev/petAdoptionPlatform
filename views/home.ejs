@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Welcome to PetAdoptPro</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/index.css" />
+    <link rel="stylesheet" href="/css/theme.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <%- include('partials/header') %>
+    <main>
+      <!-- Hero Section -->
+      <section class="hero-section text-center py-5">
+        <div class="container">
+          <img src="/images/hero-pets.svg" alt="Happy Pets" class="mb-4" height="120" />
+          <h1 class="display-5 fw-bold" style="color:#00bbf9;">Welcome to PetAdoptPro</h1>
+          <p class="lead mb-4" style="color:#495057;">
+            Where loving families meet their forever friends. Whether you’re looking to adopt a pet or manage shelter adoptions, our platform makes it easy, safe, and joyful!
+          </p>
+          <a href="/signup" class="btn btn-primary btn-lg mx-2">Get Started</a>
+          <a href="/about" class="btn btn-outline-secondary btn-lg mx-2">Learn More</a>
+        </div>
+      </section>
+
+      <!-- About Section -->
+      <section id="about" class="about-section bg-light py-5">
+        <div class="container">
+          <div class="row align-items-center">
+            <div class="col-md-6 mb-4 mb-md-0">
+              <img src="/images/about-pets.jpg" alt="Adoption Mission" class="img-fluid rounded shadow-sm" />
+            </div>
+            <div class="col-md-6">
+              <h2 class="fw-bold mb-3" style="color:#ff9770;">About Us</h2>
+              <p class="mb-3" style="font-size:1.1rem;">
+                PetAdoptPro was created to connect loving people with pets in need of a home. Our transparent, secure, and user-friendly platform helps adopters discover their new companions, and shelter staff manage pets and adoptions efficiently.
+              </p>
+              <ul class="list-unstyled">
+                <li><span style="font-size:1.3em;">🐾</span> Browse verified shelter pets</li>
+                <li><span style="font-size:1.3em;">🔒</span> Secure, easy application process</li>
+                <li><span style="font-size:1.3em;">📈</span> Dashboard for staff & adopters</li>
+                <li><span style="font-size:1.3em;">🤝</span> Community support</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact Section -->
+      <section id="contact" class="contact-section py-5">
+        <div class="container">
+          <h2 class="fw-bold text-center mb-4" style="color:#00bbf9;">Contact Us</h2>
+          <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+              <form method="post" action="/contact">
+                <div class="mb-3">
+                  <label for="contactName" class="form-label fw-bold">Your Name</label>
+                  <input type="text" class="form-control" id="contactName" name="name" required />
+                </div>
+                <div class="mb-3">
+                  <label for="contactEmail" class="form-label fw-bold">Email address</label>
+                  <input type="email" class="form-control" id="contactEmail" name="email" required />
+                </div>
+                <div class="mb-3">
+                  <label for="contactMessage" class="form-label fw-bold">Message</label>
+                  <textarea class="form-control" id="contactMessage" name="message" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success w-100">Send Message</button>
+              </form>
+              <div class="text-center mt-3">
+                <small class="text-muted">We’ll get back to you within 24 hours.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <%- include('partials/footer') %>
+  </body>
+</html>

@@ -1,44 +1,80 @@
-    body {
-      background-color: #f8f9fa;
-    }
+/* Pet Adoption Platform Theme - INDEX PAGE */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Nunito:wght@400;700&display=swap');
 
-    .signup-container {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-      margin-top: 3rem;
-    }
+body {
+  background: linear-gradient(120deg, #ffe5d9 0%, #c7f9cc 100%);
+  font-family: 'Quicksand', 'Nunito', Arial, sans-serif;
+  color: #333;
+  min-height: 100vh;
+  position: relative;
+}
 
-    h2 {
-      color: #343a40;
-      text-align: center;
-      margin-bottom: 2rem;
-    }
+.signup-container {
+  background: rgba(255,255,255,0.95);
+  padding: 2.5rem;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(100, 100, 100, 0.15);
+  margin-top: 3rem;
+  border: 2px solid #ffd6a5;
+  position: relative;
+}
 
-    .form-label {
-      color: #495057;
-    }
+.signup-container::before {
+  content: '';
+  display: block;
+  background: url('https://cdn-icons-png.flaticon.com/512/616/616408.png') no-repeat center;
+  background-size: 60px 60px;
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  top: -30px;
+  left: calc(50% - 30px);
+  opacity: 0.15;
+}
 
-    .btn-primary {
-      background-color: #007bff;
-      border: none;
-      transition: background-color 0.3s ease;
-    }
+h2 {
+  color: #ff9770;
+  text-align: center;
+  margin-bottom: 2rem;
+  font-family: 'Quicksand', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 2.2rem;
+  letter-spacing: 1px;
+}
 
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
+.form-label {
+  color: #495057;
+  font-weight: 700;
+}
 
-    .card {
-      border: none;
-      border-radius: 10px;
-    }
+.btn-primary {
+  background-color: #00bbf9;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Quicksand', Arial, sans-serif;
+  font-weight: 700;
+  padding: 0.7rem 2rem;
+  box-shadow: 0 2px 8px rgba(0,187,249,0.07);
+  transition: background 0.3s;
+}
 
-    .text-center a {
-      color: #007bff;
-    }
+.btn-primary:hover {
+  background-color: #00a1d6;
+}
 
-    .text-center a:hover {
-      text-decoration: underline;
-    }
+.card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(255,151,112,0.07);
+}
+
+.text-center a {
+  color: #ff9770;
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+.text-center a:hover {
+  color: #ffd6a5;
+  text-decoration: underline;
+}

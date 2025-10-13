@@ -1,40 +1,53 @@
-    body {
-      background-color: #f8f9fa;
-      font-family: Arial, sans-serif;
-    }
+/* Pet Adoption Platform Theme - STATS PAGE */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Nunito:wght@400;700&display=swap');
 
-    .container {
-      margin-top: 3rem;
-    }
+body {
+  background: linear-gradient(120deg, #c7f9cc 0%, #ffe5d9 100%);
+  font-family: 'Quicksand', 'Nunito', Arial, sans-serif;
+  color: #333;
+  min-height: 100vh;
+}
 
-    .table {
-      margin-top: 2rem;
-      border-radius: 0.5rem;
-      overflow: hidden;
-      background-color: #ffffff;
-    }
+.container {
+  margin-top: 3rem;
+}
 
-    .table thead th {
-      background-color: #007bff;
-      color: #ffffff;
-      font-weight: bold;
-    }
+.table {
+  margin-top: 2rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 8px 32px rgba(0,187,249,0.07);
+  border: 2px solid #ffd6a5;
+}
 
-    .table tbody tr:nth-of-type(odd) {
-      background-color: #e9ecef;
-    }
+.table thead th {
+  background-color: #00bbf9;
+  color: #fff;
+  font-weight: bold;
+  font-family: 'Quicksand', Arial, sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #ffd6a5;
+}
 
-    .table tbody tr:hover {
-      background-color: #f1f3f5;
-    }
+.table tbody tr:nth-of-type(odd) {
+  background-color: #f9f9f9;
+}
 
-    h2 {
-      text-align: center;
-      color: #343a40;
-      margin-bottom: 2rem;
-      font-size: 2rem;
-    }
+.table tbody tr:hover {
+  background-color: #ffe5d9;
+}
 
-    .table-responsive {
-      margin: 0 auto;
-    }
+h2 {
+  text-align: center;
+  color: #ff9770;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-family: 'Quicksand', Arial, sans-serif;
+  font-weight: 700;
+}
+
+.table-responsive {
+  margin: 0 auto;
+}
