@@ -1,5 +1,5 @@
 import express from "express";
-import pg from "pg";
+import pkg from "pg";
 import bodyParser from "body-parser";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -7,23 +7,24 @@ import session from "express-session";
 import ejs from 'ejs';
 import fs from "fs";
 import multer from "multer";
+import dotenv from "dotenv";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT;
+
+dotenv.config();
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const db = new pg.Pool({
-  user: "postgres", 
-  host: "localhost",
-  database: "petAdaptionPlatform",
-  password: "root", 
-  port: 5432,
+const db = new pkg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  // ssl: { rejectUnauthorized: false }
 });
 const upload = multer({ storage: multer.memoryStorage() });
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(session({
-  secret: 'Hello World',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false }
@@ -120,7 +121,7 @@ app.post("/signin", async (req, res) => {
 });
 
 app.post('/postpet', upload.single('image'), async (req, res) => {
-  const client = await db.connect(); // Await the connection to get the client
+  const client = await db.connect();
   try {
     const userId = req.session.user?.id;
     const animal = req.body.animal;
@@ -180,7 +181,7 @@ app.get("/shelterstaff", async (req, res) => {
 
 
 app.get("/adopter", async (req, res) => {
-  const client = await db.connect(); // Connect to the database
+  const client = await db.connect();
   try {
     const result = await client.query("SELECT * FROM shelterstaff");
     const pets = result.rows;
@@ -192,7 +193,7 @@ app.get("/adopter", async (req, res) => {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
-    await client.release(); // Ensure the client is released after query execution
+    await client.release();
   }
 });
 
