@@ -17,7 +17,7 @@ dotenv.config();
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const db = new pkg.Pool({
   connectionString: process.env.DATABASE_URL,
-  // ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false }
 });
 const upload = multer({ storage: multer.memoryStorage() });
 
