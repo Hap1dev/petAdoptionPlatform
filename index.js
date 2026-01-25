@@ -8,18 +8,38 @@ import ejs from 'ejs';
 import fs from "fs";
 import multer from "multer";
 import dotenv from "dotenv";
+import { z } from 'zod';
+import bcrypt from 'bcrypt';
 
 const app = express();
 const port = process.env.PORT;
+const saltRounds = 10;
 
 dotenv.config();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const db = new pkg.Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
+let config = {
+  connectionString: process.env.DATABASE_URL
+};
+
+if(process.env.NODE_ENV==="production")
+  config.ssl = { rejectUnauthorized: false };
+
+const db = new pkg.Pool(config);
 const upload = multer({ storage: multer.memoryStorage() });
+
+const signupSchema = z.object({
+  firstname: z.string().min(1, { message: "First name is required" }),
+  lastname: z.string().min(1, { message: "Last name is required" }),
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string().min(6, { message: "Password must be at least 6 characters long" }),
+  role: z.enum(['shelterstaff', 'adopter'], { message: "Invalid role selected" })
+});
+
+const signinSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string().min(1, { message: "Password is required" }),
+});
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
@@ -30,98 +50,99 @@ app.use(session({
   cookie: { secure: false }
 }));
 app.use(express.json());
+app.set('view engine', 'ejs');
 
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/index.html");
+  res.render("index", { error: req.query.error });
 });
 
 app.get("/signin", (req, res) => {
-	res.sendFile(__dirname + "/signin.html");
+	res.render("signin", { error: req.query.error });
 });
 
 app.post("/signup", async (req, res) => {
   try {
-    const firstname = req.body.firstname;
-    const lastname = req.body.lastname;
-    const email = req.body.email;
-    const password = req.body.password;
-    const role = req.body.role;
-
-    if (!firstname || !lastname || !email || !password || !role) {
-      return res.status(400).json({ error: "Missing required fields" });
+    const validation = signupSchema.safeParse(req.body);
+    if (!validation.success) {
+      const formattedErrors = validation.error.flatten().fieldErrors;
+      const firstError = Object.values(formattedErrors)[0]?.[0];
+      const error = firstError || "Invalid input. Please check your data.";
+      return res.redirect(`/?error=${encodeURIComponent(error)}`);
     }
 
-    const client = await db.connect();
-    try {
-      await client.query(
-        "INSERT INTO users (firstname, lastname, email, password, role) VALUES ($1, $2, $3, $4, $5)",
-        [firstname, lastname, email, password, role]
-      );
-      res.sendFile(__dirname + "/signin.html");
-    } finally {
-      await client.release();
+    const { firstname, lastname, email, password, role } = validation.data;
+
+    const checkUser = await db.query("SELECT * FROM users WHERE email = $1", [email]);
+
+    if (checkUser.rows.length > 0) {
+      return res.redirect("/?error=Email+already+exists.+Please+try+another+one.");
     }
+
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    await db.query(
+      "INSERT INTO users (firstname, lastname, email, password, role) VALUES ($1, $2, $3, $4, $5)",
+      [firstname, lastname, email, passwordHash, role]
+    );
+    res.redirect("/signin");
   } catch (error) {
     console.error("Error creating user:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.redirect("/?error=Internal+Server+Error");
   }
 });
 
 
 app.post("/signin", async (req, res) => {
   try {
-    const email = req.body.email;
-    const password = req.body.password;
+    const validation = signinSchema.safeParse(req.body);
+    if (!validation.success) {
+      const formattedErrors = validation.error.flatten().fieldErrors;
+      const firstError = Object.values(formattedErrors)[0]?.[0];
+      const error = firstError || "Invalid input. Please check your data.";
+      return res.redirect(`/signin?error=${encodeURIComponent(error)}`);
+    }
+    const { email, password } = validation.data;
 
-    // Validate input (optional)
-    if (!email || !password) {
-      return res.status(400).json({ error: "Missing required fields" });
+    const result = await db.query(
+      "SELECT * FROM users WHERE email = $1",
+      [email]
+    );
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.redirect("/signin?error=Invalid+credentials");
     }
 
-    const client = await db.connect();
-    try {
-      const result = await client.query(
-        "SELECT * FROM users WHERE email = $1",
-        [email]
-      );
-      const user = result.rows[0];
+    const match = await bcrypt.compare(password, user.password);
 
-      if (!user || user.password !== password) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-
-      req.session.email = email;
-      req.session.user = { id: user.id };
-
-      console.log(req.session);
-
-      const role = user.role;
-
-      let rolePage, rolePageConfig;
-      switch (role) {
-        case "adopter":
-          res.redirect("/adopter");
-          break;
-        case "shelterstaff":
-          res.redirect("/shelterstaff");
-          break;
-        default:
-          return res.status(403).json({ error: "Unauthorized role" });
-      }
-    } finally {
-      await client.release();
+    if (!match) {
+      return res.redirect("/signin?error=Invalid+credentials");
     }
 
-   	
+    req.session.email = email;
+    req.session.user = { id: user.id };
 
+    console.log(req.session);
+
+    const role = user.role;
+
+    switch (role) {
+      case "adopter":
+        res.redirect("/adopter");
+        break;
+      case "shelterstaff":
+        res.redirect("/shelterstaff");
+        break;
+      default:
+        return res.redirect("/signin?error=Unauthorized+role");
+    }
   } catch (error) {
     console.error("Error signing in:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.redirect("/signin?error=Internal+Server+Error");
   }
 });
 
 app.post('/postpet', upload.single('image'), async (req, res) => {
-  const client = await db.connect();
   try {
     const userId = req.session.user?.id;
     const animal = req.body.animal;
@@ -137,7 +158,7 @@ app.post('/postpet', upload.single('image'), async (req, res) => {
 
     const imageData = req.file ? req.file.buffer : null;
 
-    await client.query(
+    await db.query(
       `INSERT INTO shelterstaff (uid, animal, breed, state, city, street, pincode, image) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [userId, animal, breed, state, city, street, pincode, imageData]
@@ -147,8 +168,6 @@ app.post('/postpet', upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error('Error posting pet information:', error);
     res.status(500).json({ error: 'Internal Server Error' });
-  } finally {
-    client.release(); // Ensure the client is released
   }
 });
 
@@ -162,17 +181,12 @@ app.get("/shelterstaff", async (req, res) => {
       return res.status(400).json({ error: "User not authenticated" });
     }
 
-    const client = await db.connect();
-    try {
-      const result = await client.query("SELECT * FROM shelterstaff WHERE uid = $1", [uid]);
-      const pets = result.rows;
+    const result = await db.query("SELECT * FROM shelterstaff WHERE uid = $1", [uid]);
+    const pets = result.rows;
 
-      res.render("shelterstaff.ejs", {
-        pets: pets
-      });
-    } finally {
-      await client.release();
-    }
+    res.render("shelterstaff.ejs", {
+      pets: pets
+    });
   } catch (error) {
     console.error("Error getting data:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -181,42 +195,46 @@ app.get("/shelterstaff", async (req, res) => {
 
 
 app.get("/adopter", async (req, res) => {
-  const client = await db.connect();
+  console.log(req.session);
   try {
-    const result = await client.query("SELECT * FROM shelterstaff");
+    const result = await db.query("SELECT * FROM shelterstaff");
     const pets = result.rows;
 
     res.render("adopter.ejs", {
-      pets: pets
+      pets: pets,
+      message: req.query.message,
+      messageType: req.query.messageType
     });
   } catch (error) {
     console.error("Error fetching data:", error);
     res.status(500).json({ error: "Internal Server Error" });
-  } finally {
-    await client.release();
   }
 });
 
 app.post("/interested", async (req, res) => {
 	const uid = req.session.user?.id;
+  if (!uid) {
+    return res.redirect("/signin?error=You+must+be+logged+in+to+show+interest.");
+  }
 	const pid = req.body.pet;
-	const client = await db.connect();
 	try{
-		const result = await client.query("INSERT INTO interested(uid, pid) VALUES($1, $2)", [uid, pid]);
-		res.redirect("/adopter");
+        const check = await db.query("SELECT * FROM interested WHERE uid = $1 AND pid = $2", [uid, pid]);
+        if (check.rows.length > 0) {
+            return res.redirect("/adopter?message=You have already shown interest in this pet.&messageType=error");
+        }
+
+		const result = await db.query("INSERT INTO interested(uid, pid) VALUES($1, $2)", [uid, pid]);
+		res.redirect("/adopter?message=Your interest has been recorded successfully!&messageType=success");
 	}catch(error){
 		console.error("Error making request:", error);
-    	res.status(500).json({ error: "Internal Server Error" });
-	}finally{
-		await client.release();
+    	res.redirect("/adopter?message=An error occurred. Please try again.&messageType=error");
 	}
 });
 
 app.get("/stats", async (req, res) => {
 	const uid = req.session.user?.id;
-	const client = await db.connect();
 	try{
-		const result = await client.query("SELECT firstname, lastname, animal, breed, email FROM interested AS i INNER JOIN users AS u ON i.uid = u.id INNER JOIN shelterstaff AS s ON i.pid = s.id WHERE s.uid = $1", [uid]);
+		const result = await db.query("SELECT firstname, lastname, animal, breed, email FROM interested AS i INNER JOIN users AS u ON i.uid = u.id INNER JOIN shelterstaff AS s ON i.pid = s.id WHERE s.uid = $1", [uid]);
 		const data = result.rows;
 		res.render("stats.ejs", {
 			data: data
@@ -224,23 +242,18 @@ app.get("/stats", async (req, res) => {
 	}catch(error){
 		console.error("Error making request:", error);
     	res.status(500).json({ error: "Internal Server Error" });
-	}finally{
-		await client.release();
 	}
 
 });
 
 app.post("/deletepet/:id", async (req, res) => {
   const petId = req.params.id;
-  const client = await db.connect();
   try{
-    await client.query("DELETE FROM shelterstaff WHERE id = $1", [petId]);
+    await db.query("DELETE FROM shelterstaff WHERE id = $1", [petId]);
     res.redirect("/shelterstaff");
   }catch(error){
     console.error("Error making request: ", error);
     res.status(500).json({error: "Internal Server Error"});
-  }finally{
-    await client.release();
   }
 });
 

@@ -13,6 +13,11 @@
   <div class="container d-flex justify-content-center align-items-center">
     <div class="signup-container col-md-6">
       <h2>Sign up</h2>
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger" role="alert">
+          <%= error %>
+        </div>
+      <% } %>
       <form action="/signup" method="post">
         <div class="mb-3">
           <label for="firstname" class="form-label">Firstname</label>

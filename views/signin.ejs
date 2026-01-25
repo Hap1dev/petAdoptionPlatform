@@ -13,6 +13,11 @@
   <div class="container d-flex justify-content-center align-items-center">
     <div class="signin-container col-md-4">
       <h2>Sign in</h2>
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger" role="alert">
+          <%= error %>
+        </div>
+      <% } %>
       <form action="/signin" method="post">
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>
