@@ -24,4 +24,9 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-export default authenticateToken;
+const noCache = (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store');
+  next();
+};
+
+export { authenticateToken, noCache };

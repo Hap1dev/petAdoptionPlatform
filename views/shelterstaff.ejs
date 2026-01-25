@@ -11,7 +11,7 @@
 </head>
 
 <body>
-  <%- include('partials/header') %>
+  <%- include('partials/header', { user: user }) %>
 
   <div class="container">
     <h1 class="text-center my-4">Add Pets</h1>
@@ -83,11 +83,6 @@
     <% }) %>
   </div>
 <% } %>
-
-
-    <div class="text-center mt-4">
-      <a href="/stats" class="btn btn-link">View Stats</a>
-    </div>
   </div>
 <%- include('partials/footer') %>
 </body>

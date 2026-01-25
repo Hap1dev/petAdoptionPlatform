@@ -1,6 +1,6 @@
 import express from 'express';
 import db from '../db.js';
-import authenticateToken from '../authMiddleware.js';
+import { authenticateToken, noCache } from '../authMiddleware.js';
 import multer from 'multer';
 
 const router = express.Router();
@@ -15,7 +15,7 @@ router.get("/signin", (req, res) => {
 	res.render("signin", { error: req.query.error, user: req.user });
 });
 
-router.post('/postpet', authenticateToken, upload.single('image'), async (req, res) => {
+router.post('/postpet', authenticateToken, noCache, upload.single('image'), async (req, res) => {
   try {
     const userId = req.user.id;
     const animal = req.body.animal;
@@ -46,7 +46,7 @@ router.post('/postpet', authenticateToken, upload.single('image'), async (req, r
 
 
 
-router.get("/shelterstaff", authenticateToken, async (req, res) => {
+router.get("/shelterstaff", authenticateToken, noCache, async (req, res) => {
   try {
     const uid = req.user.id;
     
@@ -85,7 +85,7 @@ router.get("/adopter", async (req, res) => {
   }
 });
 
-router.post("/interested", authenticateToken, async (req, res) => {
+router.post("/interested", authenticateToken, noCache, async (req, res) => {
 	const uid = req.user.id;
   if (!uid) {
     return res.redirect("/signin?error=You+must+be+logged+in+to+show+interest.");
@@ -105,7 +105,7 @@ router.post("/interested", authenticateToken, async (req, res) => {
 	}
 });
 
-router.get("/stats", authenticateToken, async (req, res) => {
+router.get("/stats", authenticateToken, noCache, async (req, res) => {
 	const uid = req.user.id;
 	try{
 		const result = await db.query("SELECT firstname, lastname, animal, breed, email FROM interested AS i INNER JOIN users AS u ON i.uid = u.id INNER JOIN shelterstaff AS s ON i.pid = s.id WHERE s.uid = $1", [uid]);
@@ -121,14 +121,21 @@ router.get("/stats", authenticateToken, async (req, res) => {
 
 });
 
-router.post("/deletepet/:id", authenticateToken, async (req, res) => {
+router.post("/deletepet/:id", authenticateToken, noCache, async (req, res) => {
   const petId = req.params.id;
+  const client = await db.connect();
   try{
-    await db.query("DELETE FROM shelterstaff WHERE id = $1", [petId]);
+    await client.query('BEGIN');
+    await client.query("DELETE FROM interested WHERE pid = $1", [petId]);
+    await client.query("DELETE FROM shelterstaff WHERE id = $1", [petId]);
+    await client.query('COMMIT');
     res.redirect("/shelterstaff");
   }catch(error){
+    await client.query('ROLLBACK');
     console.error("Error making request: ", error);
     res.status(500).json({error: "Internal Server Error"});
+  } finally {
+    client.release();
   }
 });
 
